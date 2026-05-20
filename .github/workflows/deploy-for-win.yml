@@ -62,11 +62,20 @@ jobs:
       - name: run-its
         run: mvn install -Prun-its-win
 
+      - name: Collect artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="$HOME/.m2/repository/${{ needs.initialize.outputs.group-id }}/${{ needs.initialize.outputs.artifact-id }}/${{ needs.initialize.outputs.version }}"
+          DST="$GITHUB_WORKSPACE/work-upload"
+          mkdir -p "$DST"
+          cp -r "$SRC"/* "$DST"/
+
       - name: Upload built artifacts
         uses: actions/upload-artifact@v4
         with:
           name: maven-artifacts-${{ github.run_id  }}
-          path: $HOME/.m2/repository/${{ needs.initialize.outputs.group-id }}/${{ needs.initialize.outputs.artifact-id }}/${{ needs.initialize.outputs.version }}
+          path: work-upload
           if-no-files-found: error
 
   # 結合テストジョブで成功したら、渡された成果物一式を別のリポジトリにpushします。
