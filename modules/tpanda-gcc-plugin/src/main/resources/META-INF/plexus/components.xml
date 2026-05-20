@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component-set xmlns="http://plexus.codehaus.org/components"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://plexus.codehaus.org/components
+                                   http://plexus.codehaus.org/xsd/components-1.0.0.xsd">
+
+    <components>
+<!-- ${packaging.dll} -->
+        <component>
+            <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+            <role-hint>${packaging.dll}</role-hint>
+            <implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
+            <configuration>
+                <phases>
+                    <compile>
+                        ${project.groupId}:${project.artifactId}:cc-compile
+                       ,${project.groupId}:${project.artifactId}:cxx-compile
+                    </compile>
+                    <package>
+                        ${project.groupId}:${project.artifactId}:link-dll
+                    </package>
+                    <install>
+                        org.apache.maven.plugins:maven-install-plugin:install
+                    </install>
+                </phases>
+            </configuration>
+        </component>
+        <component>
+            <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+            <role-hint>${packaging.dll}</role-hint>
+            <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>
+            <configuration>
+                <extension>dll</extension>
+                <type>dll</type>
+                <packaging>${packaging.dll}</packaging>
+            </configuration>
+        </component>
+<!-- ${packaging.dll} -->
+<!-- ${packaging.exe} -->
+        <component>
+            <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+            <role-hint>${packaging.exe}</role-hint>
+            <implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
+            <configuration>
+                <phases>
+                    <compile>
+                        ${project.groupId}:${project.artifactId}:cc-compile
+                       ,${project.groupId}:${project.artifactId}:cxx-compile
+                    </compile>
+                    <package>
+                        ${project.groupId}:${project.artifactId}:link-exe
+                    </package>
+                    <install>
+                        org.apache.maven.plugins:maven-install-plugin:install
+                    </install>
+                </phases>
+            </configuration>
+        </component>
+        <component>
+            <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+            <role-hint>${packaging.exe}</role-hint>
+            <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>
+            <configuration>
+                <extension>exe</extension>
+                <type>exe</type>
+                <packaging>${packaging.exe}</packaging>
+            </configuration>
+        </component>
+<!-- ${packaging.exe} -->
+    </components>
+
+</component-set>

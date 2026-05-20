@@ -1,0 +1,50 @@
+name: Publish GitHub-Pages
+on:
+  push:
+    branches: [ dominus ]
+
+permissions:
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build GitHub-Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: setup-jdk
+        uses: actions/setup-java@v3
+        with:
+          java-version: '19'
+          distribution: 'temurin'
+          cache: maven  # 依存関係をキャッシュ
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.9.9
+
+      - name: generate site
+        run: mvn site site:stage
+
+      - name: upload pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/staging/
+
+  deploy:
+    name: Deploy GitHub-Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: deployment
+        id: deployment
+        uses: actions/deploy-pages@v4

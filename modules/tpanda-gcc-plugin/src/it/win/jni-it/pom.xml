@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>tpanda.maven.plugins.it</groupId>
+  <artifactId>jni-it</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <description>依存関係のテスト</description>
+
+  <properties>
+    <jniHeaderDirectory>${project.build.directory}/jni-headers</jniHeaderDirectory>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <compilerArgs>
+            <arg>-h</arg> <arg>${jniHeaderDirectory}</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>@project.groupId@</groupId>
+        <artifactId>@project.artifactId@</artifactId>
+        <version>@project.version@</version>
+        <executions>
+          <execution>
+            <id>jni-native-compile-win</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>cc-compile</goal>
+              <goal>cxx-compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jni-native-link-win</id>
+            <phase>package</phase>
+            <goals>
+              <goal>link-jni-dll</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <outputDirectory>${project.build.directory}/objects</outputDirectory>
+          <sourceDirectory>${project.basedir}/src/main/cpp</sourceDirectory>
+<!--            <testSourceDirectory>${project.basedir}/src/test/cpp</testSourceDirectory>-->
+          <additionalIncludeDirectories>
+            <additionalIncludeDirectory>${jniHeaderDirectory}</additionalIncludeDirectory>
+          </additionalIncludeDirectories>
+          <includeJNI>true</includeJNI>
+          <classifier>jni-win</classifier>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

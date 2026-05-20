@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>tpanda.maven.plugins.it</groupId>
+  <artifactId>build-dll-it</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>gcc-dll</packaging>
+
+  <description>DLLのビルドテスト</description>
+
+  <properties>
+  </properties>
+
+  <build>
+    <sourceDirectory>${project.basedir}/src/main/cpp</sourceDirectory>
+    <testSourceDirectory>${project.basedir}/src/test/cpp</testSourceDirectory>
+    <outputDirectory>${project.build.directory}/objects</outputDirectory>
+    <plugins>
+      <plugin>
+        <groupId>@project.groupId@</groupId>
+        <artifactId>@project.artifactId@</artifactId>
+        <version>@project.version@</version>
+        <extensions>true</extensions>
+        <configuration>
+          <cppflags>-D BUILD_MYMATH</cppflags>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

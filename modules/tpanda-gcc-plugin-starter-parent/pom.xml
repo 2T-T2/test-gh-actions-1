@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>tpanda.maven.plugins</groupId>
+    <artifactId>tpanda-gcc-plugin-project</artifactId>
+    <version>0.0.0</version>
+  </parent>
+
+  <artifactId>tpanda-gcc-plugin-starter-parent</artifactId>
+  <packaging>pom</packaging>
+
+  <name>tpanda-gcc-plugin セットアップ用の親POM</name>
+
+  <properties>
+    <gcc.plugin.version>${project.version}</gcc.plugin.version>
+  </properties>
+
+  <dependencies>
+  </dependencies>
+  
+  <build>
+    <sourceDirectory>${project.basedir}/src/main/cpp</sourceDirectory>
+    <testSourceDirectory>${project.basedir}/src/test/cpp</testSourceDirectory>
+    <outputDirectory>${project.build.directory}/objects</outputDirectory>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>tpanda.maven.plugins</groupId>
+          <artifactId>tpanda-gcc-plugin</artifactId>
+          <version>${gcc.plugin.version}</version>
+          <extensions>true</extensions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

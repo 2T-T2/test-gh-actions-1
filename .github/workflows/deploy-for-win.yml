@@ -1,0 +1,121 @@
+name: Deploy For Windows
+on:
+  push:
+    branches: [ dominus ]
+    tags: [ v* ]
+
+permissions:
+  id-token: write
+
+jobs:
+  # ジョブで使用する情報を出力します
+  initialize:
+    runs-on: ubuntu-latest
+    outputs:
+      repository : ${{ steps.artifacts-repository.outputs.repository }}
+      group-id   : ${{ steps.artifact-metadata.outputs.group-id }}
+      artifact-id: ${{ steps.artifact-metadata.outputs.artifact-id }}
+      version    : ${{ steps.artifact-metadata.outputs.version }}
+    steps:
+      # maven 成果物を格納するリポジトリ設定
+      - name: artifacts repository
+        id: artifacts-repository
+        run: |
+          echo "repository=test" >> "$GITHUB_OUTPUT"
+
+      # maven 成果物のメタデータ設定
+      - name: metadata getter
+        id: artifact-metadata
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          VERSION="${GITHUB_REF_NAME:-}"
+          VERSION="${VERSION#v}"
+          echo "group-id=org/example" >> "$GITHUB_OUTPUT"
+          echo "artifact-id=my-lib"   >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION"     >> "$GITHUB_OUTPUT"
+
+  # maven で 結合テストを行い、成果物一式をデプロイジョブに渡します
+  its:
+    name: Run Integrated Test
+    needs: initialize
+    runs-on: windows-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: setup-jdk
+        uses: actions/setup-java@v3
+        with:
+          java-version: '19'
+          distribution: 'temurin'
+          cache: maven  # 依存関係をキャッシュ
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.9.9
+
+      - name: run-its
+        run: mvn install -Prun-its-win
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-artifacts-${{ github.run_id  }}
+          path: $HOME/.m2/repository/${{ needs.initialize.outputs.group-id }}/${{ needs.initialize.outputs.artifact-id }}/${{ needs.initialize.outputs.version }}
+          if-no-files-found: error
+
+  # 結合テストジョブで成功したら、渡された成果物一式を別のリポジトリにpushします。
+  deploy:
+    name: Deploy Artifact
+    needs: [its, initialize]
+    runs-on: windows-latest
+    steps:
+      - name: Create GitHub App token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          repositories: ${{ needs.initialize.outputs.repository }}
+
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          repository: 2T-T2/${{ needs.initialize.outputs.repository }}
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+          path: deploy-work
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-artifacts-${{ github.run_id  }}
+          path: deploy-work/artifacts
+
+      - name: Prepare and push to target repo
+        shell: bash
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail 
+
+          cd deploy-work
+          
+          SRC="artifacts/."
+          DST="${{ needs.initialize.outputs.group-id }}/${{ needs.initialize.outputs.artifact-id }}/${{ needs.initialize.outputs.version }}/"
+
+          mkdir -p "$DST"
+          cp -r "$SRC" "$DST"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add "$DST"
+          git commit -m "[skip ci]【GH-ACT】test push from other repo."
+          git config --unset-all http.https://github.com/.extraheader || true
+          git remote add target "https://x-access-token:${APP_TOKEN}@github.com/2T-T2/${{ needs.initialize.outputs.repository }}.git"
+          git push target
