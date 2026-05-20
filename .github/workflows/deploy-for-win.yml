@@ -32,9 +32,9 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME:-}"
           VERSION="${VERSION#v}"
-          echo "group-id=org/example" >> "$GITHUB_OUTPUT"
-          echo "artifact-id=my-lib"   >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION"     >> "$GITHUB_OUTPUT"
+          echo "group-id=tpanda/maven/plugins"         >> "$GITHUB_OUTPUT"
+          echo "artifact-id=tpanda-gcc-plugin-project" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION"                      >> "$GITHUB_OUTPUT"
 
   # maven で 結合テストを行い、成果物一式をデプロイジョブに渡します
   its:
