@@ -1,8 +1,9 @@
 name: Deploy For Windows
 on:
-  push:
-    branches: [ dominus ]
-    tags: [ v* ]
+  workflow_dispatch:
+#  push:
+#    branches: [ dominus ]
+#    tags: [ v* ]
 
 permissions:
   id-token: write
