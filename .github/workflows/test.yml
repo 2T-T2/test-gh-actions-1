@@ -6,18 +6,30 @@ jobs:
   test-job-001:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/create-github-app-token@v1
+      - name: Create GitHub App token
+        uses: actions/create-github-app-token@v1
         id: app-token
         with:
-          app_id: ${{ vars.APP_ID }}
-          private_key: ${{ secrets.PRIVATE_KEY }}
-          repositories: test
-      - uses: actions/checkout@v4
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          repositories: 2T-T2/test
+
+      - name: Checkout source
+        uses: actions/checkout@v4
         with:
           token: ${{ steps.app-token.outputs.token }}
-      - run: |
+          fetch-depth: 0
+
+      - name: Prepare and push to target repo
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
           echo test >> test.txt
-          git remote add origin https://github.com/2T-T2/test.git
           git add -A
           git commit -m "【GH-ACT】 test push from other repo"
-          git push origin
+          git config --unset-all http.https://github.com/.extraheader || true
+          git remote add target "https://x-access-token:${APP_TOKEN}@github.com/2T-T2/test.git"
+          git push target
