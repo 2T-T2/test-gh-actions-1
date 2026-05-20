@@ -14,9 +14,10 @@ jobs:
           private-key: ${{ secrets.PRIVATE_KEY }}
           repositories: test
 
-      - name: Checkout source
+      - name: Checkout target repository
         uses: actions/checkout@v4
         with:
+          repository: 2T-T2/test
           token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 0
 
@@ -29,7 +30,7 @@ jobs:
 
           echo test >> test.txt
           git add -A
-          git commit -m "【GH-ACT】 test push from other repo"
+          git commit -m "【GH-ACT】 test push from other repo.[skip ci]"
           git config --unset-all http.https://github.com/.extraheader || true
           git remote add target "https://x-access-token:${APP_TOKEN}@github.com/2T-T2/test.git"
           git push target
