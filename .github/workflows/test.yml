@@ -1,1 +1,23 @@
- 
+name: test-workflow
+on:
+  workflow_dispatch:
+
+jobs:
+  test-job-001:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app_id: ${{ vars.APP_ID }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          repositories: test
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+      - run: |
+          echo test >> test.txt
+          git remote add origin https://github.com/2T-T2/test.git
+          git add -A
+          git commit -m "【GH-ACT】 test push from other repo"
+          git push origin
