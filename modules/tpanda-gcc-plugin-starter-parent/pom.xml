@@ -7,6 +7,7 @@
     <groupId>tpanda.maven.plugins</groupId>
     <artifactId>tpanda-gcc-plugin-project</artifactId>
     <version>0.0.0</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <artifactId>tpanda-gcc-plugin-starter-parent</artifactId>
