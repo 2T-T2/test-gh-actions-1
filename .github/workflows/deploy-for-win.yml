@@ -60,7 +60,7 @@ jobs:
           maven-version: 3.9.9
 
       - name: run-its
-        run: mvn -B deploy -DaltDeploymentRepository=local::file:"${GITHUB_WORKSPACE}/target/deploy-repo -Prun-its-win"
+        run: mvn -B deploy -DaltDeploymentRepository=local::file:"${GITHUB_WORKSPACE}/target/deploy-repo" -Prun-its-win
 
       - name: Collect artifacts
         shell: bash
