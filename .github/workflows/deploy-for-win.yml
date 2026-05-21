@@ -122,7 +122,9 @@ jobs:
           DST="."
 
           mkdir -p "$DST"
-          cp -r "$SRC" "$DST"
+          cp -r "$SRC/." "$DST"
+
+          rm -rf "$SRC"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
