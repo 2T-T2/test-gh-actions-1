@@ -118,7 +118,7 @@ jobs:
           
           find .
           
-          SRC="./artifacts/deploy-repo/"
+          SRC="./artifacts/deploy-repo/*"
           DST="."
 
           mkdir -p "$DST"
