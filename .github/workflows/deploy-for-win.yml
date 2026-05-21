@@ -14,27 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       repository : ${{ steps.artifacts-repository.outputs.repository }}
-      group-id   : ${{ steps.artifact-metadata.outputs.group-id }}
-      artifact-id: ${{ steps.artifact-metadata.outputs.artifact-id }}
-      version    : ${{ steps.artifact-metadata.outputs.version }}
     steps:
       # maven 成果物を格納するリポジトリ設定
       - name: artifacts repository
         id: artifacts-repository
         run: |
           echo "repository=test" >> "$GITHUB_OUTPUT"
-
-      # maven 成果物のメタデータ設定
-      - name: metadata getter
-        id: artifact-metadata
-        env:
-          GITHUB_REF_NAME: ${{ github.ref_name }}
-        run: |
-          VERSION="${GITHUB_REF_NAME:-}"
-          VERSION="${VERSION#v}"
-          echo "group-id=tpanda/maven/plugins"         >> "$GITHUB_OUTPUT"
-          echo "artifact-id=tpanda-gcc-plugin-project" >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION"                      >> "$GITHUB_OUTPUT"
 
   # maven で 結合テストを行い、成果物一式をデプロイジョブに渡します
   its:
@@ -67,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          SRC="$GITHUB_WORKSPACE/target/deploy-repo/"
+          SRC="$GITHUB_WORKSPACE/target/deploy-repo/."
           DST="$GITHUB_WORKSPACE/work-upload/"
           mkdir -p "$DST"
           cp -r "$SRC" "$DST"
@@ -105,7 +90,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: maven-artifacts-${{ github.run_id  }}
-          path: deploy-work/artifacts
+          path: deploy-work
 
       - name: Prepare and push to target repo
         shell: bash
@@ -116,16 +101,6 @@ jobs:
 
           cd deploy-work
           
-          find .
-          
-          SRC="./artifacts/deploy-repo"
-          DST="."
-
-          mkdir -p "$DST"
-          cp -r "$SRC/." "$DST"
-
-          rm -rf "$SRC"
-
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
