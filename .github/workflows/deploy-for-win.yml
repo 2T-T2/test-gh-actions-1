@@ -60,13 +60,13 @@ jobs:
           maven-version: 3.9.9
 
       - name: run-its
-        run: mvn install -Prun-its-win
+        run: mvn deploy -DaltDeploymentRepository=local::default::file://${GITHUB_WORKSPACE}/target/deploy-repo -Prun-its-win
 
       - name: Collect artifacts
         shell: bash
         run: |
           set -euo pipefail
-          SRC="$HOME/.m2/repository/${{ needs.initialize.outputs.group-id }}/${{ needs.initialize.outputs.artifact-id }}/${{ needs.initialize.outputs.version }}"
+          SRC="target/deploy-repo"
           DST="$GITHUB_WORKSPACE/work-upload"
           mkdir -p "$DST"
           cp -r "$SRC"/* "$DST"/
@@ -115,8 +115,8 @@ jobs:
 
           cd deploy-work
           
-          SRC="artifacts/."
-          DST="${{ needs.initialize.outputs.group-id }}/${{ needs.initialize.outputs.artifact-id }}/${{ needs.initialize.outputs.version }}/"
+          SRC="artifacts/"
+          DST="./"
 
           mkdir -p "$DST"
           cp -r "$SRC" "$DST"
