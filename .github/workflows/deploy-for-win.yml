@@ -118,8 +118,8 @@ jobs:
           
           find .
           
-          SRC="./artifacts/"
-          DST="./"
+          SRC="./artifacts/deploy-repo/"
+          DST="."
 
           mkdir -p "$DST"
           cp -r "$SRC" "$DST"
