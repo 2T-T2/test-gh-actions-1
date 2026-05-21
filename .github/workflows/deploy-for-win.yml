@@ -116,7 +116,9 @@ jobs:
 
           cd deploy-work
           
-          SRC="artifacts/"
+          find .
+          
+          SRC="./artifacts/"
           DST="./"
 
           mkdir -p "$DST"
