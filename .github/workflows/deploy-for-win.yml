@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   # maven で 結合テストを行い、成果物一式をデプロイジョブに渡します
-  its-deploy:
+  its:
     name: Run Integrated Test
     runs-on: windows-latest
     steps:
@@ -51,8 +51,9 @@ jobs:
           path: work-upload
           if-no-files-found: error
 
-      - name: Deploy Artifacts
-        uses: ./.github/workflows/deploy.yml
-        with:
-          repository : test
-          uploaded-id: maven-artifacts-${{ github.run_id  }}
+  deploy:
+    name: Deploy Artifacts
+    uses: ./.github/workflows/deploy.yml
+    with:
+      repository : test
+      uploaded-id: maven-artifacts-${{ github.run_id  }}
