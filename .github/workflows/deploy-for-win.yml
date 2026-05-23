@@ -53,6 +53,7 @@ jobs:
 
   deploy:
     name: Deploy Artifacts
+    needs: its
     uses: ./.github/workflows/deploy.yml
     with:
       repository : test
