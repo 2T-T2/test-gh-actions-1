@@ -9,22 +9,9 @@ permissions:
   id-token: write
 
 jobs:
-  # ジョブで使用する情報を出力します
-  initialize:
-    runs-on: ubuntu-latest
-    outputs:
-      repository : ${{ steps.artifacts-repository.outputs.repository }}
-    steps:
-      # maven 成果物を格納するリポジトリ設定
-      - name: artifacts repository
-        id: artifacts-repository
-        run: |
-          echo "repository=test" >> "$GITHUB_OUTPUT"
-
   # maven で 結合テストを行い、成果物一式をデプロイジョブに渡します
-  its:
+  its-deploy:
     name: Run Integrated Test
-    needs: initialize
     runs-on: windows-latest
     steps:
       - name: checkout
@@ -64,48 +51,8 @@ jobs:
           path: work-upload
           if-no-files-found: error
 
-  # 結合テストジョブで成功したら、渡された成果物一式を別のリポジトリにpushします。
-  deploy:
-    name: Deploy Artifact
-    needs: [its, initialize]
-    runs-on: windows-latest
-    steps:
-      - name: Create GitHub App token
-        uses: actions/create-github-app-token@v1
-        id: app-token
+      - name: Deploy Artifacts
+        uses: ./.github/workflows/deploy.yml
         with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.PRIVATE_KEY }}
-          repositories: ${{ needs.initialize.outputs.repository }}
-
-      - name: Checkout target repository
-        uses: actions/checkout@v4
-        with:
-          repository: 2T-T2/${{ needs.initialize.outputs.repository }}
-          token: ${{ steps.app-token.outputs.token }}
-          fetch-depth: 0
-          path: deploy-work
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: maven-artifacts-${{ github.run_id  }}
-          path: deploy-work
-
-      - name: Prepare and push to target repo
-        shell: bash
-        env:
-          APP_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          set -euo pipefail 
-
-          cd deploy-work
-          
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add -A
-          git commit -m "[skip ci]【GH-ACT】test push from other repo."
-          git config --unset-all http.https://github.com/.extraheader || true
-          git remote add target "https://x-access-token:${APP_TOKEN}@github.com/2T-T2/${{ needs.initialize.outputs.repository }}.git"
-          git push target
+          repository : test
+          uploaded-id: maven-artifacts-${{ github.run_id  }}

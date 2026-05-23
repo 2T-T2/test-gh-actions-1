@@ -1,0 +1,56 @@
+name: Deploy
+on:
+  workflow_call:
+    inputs:
+      repository:
+        required: true
+        type: string
+        description: デプロイ先のリポジトリ
+      uploaded-id:
+        required: true
+        type: string
+        description: actions/upload-artifact の name で指定したアップロードした時の名前
+
+jobs:
+  deploy:
+    name: Deploy Artifact
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub App token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          repositories: ${{ input.repository }}
+
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          repository: 2T-T2/${{ input.repository }}
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+          path: deploy-work
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ input.uploaded-id }}
+          path: deploy-work
+
+      - name: Prepare and push to target repo
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail 
+
+          cd deploy-work
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "[skip ci]【GH-ACT】test push from other repo."
+          git config --unset-all http.https://github.com/.extraheader || true
+          git remote add target "https://x-access-token:${APP_TOKEN}@github.com/2T-T2/${{ input.repository }}.git"
+          git push target
